@@ -10,6 +10,7 @@ RUN apt-get -y update && \
     pip install --no-cache-dir -r requirements.txt
 
 COPY ./src/ /${PROJECT_DIR}/src/
+COPY ./models/ /${PROJECT_DIR}/models/
 
 ENV LOG_LEVEL DEBUG
 ENV LOG_FORMAT TEXT

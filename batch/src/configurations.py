@@ -34,7 +34,7 @@ class ModelConfigurations:
     onnx_input_name_2 = os.getenv("ONNX_INPUT_NAME_2", "token_type_ids")
     onnx_input_name_3 = os.getenv("ONNX_INPUT_NAME_3", "attention_mask")
     onnx_output_name = os.getenv("ONNX_OUTPUT_NAME", "output")
-    label_path = os.getenv("LABEL_FILEPATH", "/batch/src/models/labels.json")
+    label_path = os.getenv("LABEL_FILEPATH", "/batch/models/labels.json")
 
 logger.info(f"{ServiceConfigurations.__name__}: {ServiceConfigurations.__dict__}")
 logger.info(f"{PlatformConfigurations.__name__}: {PlatformConfigurations.__dict__}")
