@@ -15,18 +15,6 @@ build:
 		-t $(DOCKER_REPOSITORY):$(TEMPLATE_PATTERN)_$(IMAGE_VERSION) \
 		-f $(DOCKERFILE) \
 		.
-	 
-.PHONY: run
-run:
-	docker run \
-		-d \
-		--name $(TEMPLATE_PATTERN) \
-		-p $(TEMPLATE_PATTERN_PORT):$(TEMPLATE_PATTERN_PORT) \
-		$(DOCKER_REPOSITORY):$(TEMPLATE_PATTERN)_$(IMAGE_VERSION)
-
-.PHONY: rm 
-rm:
-	docker rm -f $(TEMPLATE_PATTERN)
 
 .PHONY: push
 push:
