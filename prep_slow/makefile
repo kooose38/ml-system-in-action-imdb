@@ -34,8 +34,12 @@ push:
 
 .PHONY: c_up
 c_up:
-        docker-compose up -d 
+	docker-compose \
+		-f ./$(DOCKER_COMPOSE) \
+		up -d
 
-.PHONY: c_down 
+.PHONY: c_down
 c_down:
-        docker stop prep_slow
+	docker-compose \
+		-f ./$(DOCKER_COMPOSE) \
+		down
