@@ -1,0 +1,22 @@
+version: "3"
+
+services:
+  prep_slow:
+    container_name: prep_slow
+    image: kooose/ml-system-in-actions:prep_slow_0.0.1
+    restart: always
+    environment:
+      - QUEUE_NAME=queue
+      - PLATFORM=docker_compose
+      - VOCAB_FILE=/prep_slow/models/en-vocab-bert.txt
+    ports:
+      - 7000:7000
+    command: ./run.sh
+    depends_on:
+      - redis
+
+  redis:
+    container_name: redis
+    image: "redis:latest"
+    ports:
+      - "6379:6379"
