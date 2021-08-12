@@ -9,6 +9,15 @@ def make_image_key(key: str) -> str:
     return f"{key}_image"
 
 
+def left_push_queue(queue_name: str, key: str) -> bool:
+    try:
+        redis_client.lpush(queue_name, key)
+        return True
+    except Exception:
+        return False
+
+
+
 def set_data_redis(key: str, value: str) -> bool:
     redis_client.set(key, value)
     return True
