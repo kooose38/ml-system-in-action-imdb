@@ -51,7 +51,7 @@ async def metadata() -> Dict[str, Dict[str, Any]]:
     return results 
 
 @router.post("/predict/test")
-async def predict(data=Data()) -> Dict[str, dict]:
+async def predict() -> Dict[str, dict]:
     job_id = str(uuid.uuid4())
     results = {}
     async with httpx.AsyncClient() as ac:
@@ -59,17 +59,17 @@ async def predict(data=Data()) -> Dict[str, dict]:
             res = await ac.post(
                 f"{url}predict", 
                 json={"data": data.data},
-                params={"id": job_id}
+                params={"job_id": job_id}
             )
             return service, res 
-        tasks = [req(ac, service, url, data, job_id) for service, url in ServiceConfigurations().services.items()]
+        tasks = [req(ac, service, url, Data(), job_id) for service, url in ServiceConfigurations().services.items()]
         responses = await asyncio.gather(*tasks)
         for service, res in responses:
             results[service] = res.json()
         return results 
 
 @router.post("/predict/test/label")
-async def predict(data=Data()) -> Dict[str, Dict[str, str]]:
+async def predict() -> Dict[str, Dict[str, str]]:
     job_id = str(uuid.uuid4())
     results = {}
     async with httpx.AsyncClient() as ac:
@@ -77,10 +77,10 @@ async def predict(data=Data()) -> Dict[str, Dict[str, str]]:
             res = await ac.post(
                 f"{url}predict/label", 
                 json={"data": data.data},
-                params={"id": job_id}
+                params={"job_id": job_id}
             )
             return service, res 
-        tasks = [req(ac, service, url, data, job_id) for service, url in ServiceConfigurationsLightModel().services.items()]
+        tasks = [req(ac, service, url, Data(), job_id) for service, url in ServiceConfigurationsLightModel().services.items()]
         responses = await asyncio.gather(*tasks)
         for service, res in responses:
             results[service] = res.json()
@@ -115,7 +115,7 @@ async def predict(data: Data) -> Dict[str, Dict[str, str]]:
             res = await ac.post(
                 f"{url}predict/label", 
                 json={"data": data.data},
-                params={"id": job_id}
+                params={"job_id": job_id}
             )
             return service, res 
         tasks = [req(ac, service, url, data, job_id) for service, url in ServiceConfigurationsLightModel().services.items()]
