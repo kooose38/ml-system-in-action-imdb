@@ -52,7 +52,7 @@ def predict_test() -> Dict[str, Any]:
 
 
 @router.get("/predict/test/label")
-def predict_test_label() -> Dict[str, str]:
+def predict_test_label() -> Dict[str, Any]:
     input_ids = classifier.transform(Data().data)
     is_outlier, outlier_score = outlier_detector.predict(input_ids)
     results = {
@@ -89,7 +89,7 @@ def predict(data: Data, job_id: str) -> Dict[str, Any]:
 
 
 @router.post("/predict/label")
-def predict_label(data: Data, job_id: str) -> Dict[str, str]:
+def predict_label(data: Data, job_id: str) -> Dict[str, Any]:
     input_ids = classifier.tranform(data.data)
     is_outlier, outlier_score = outlier_detector.predict(input_ids)
     results = {
