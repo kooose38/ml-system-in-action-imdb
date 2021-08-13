@@ -20,6 +20,9 @@ class ServiceConfigurations:
             url = str(os.getenv(environ))
             services[environ.lower().replace("service_", "")] = url
 
+class ServiceConfiguraionsOutlier:
+    outlier_url = os.getenv("OUTLIER_URL", "http://localhost:8003/predict")
+
 
 class APIConfigurations:
     title = os.getenv("API_TITLE", "ServingPattern")
@@ -41,3 +44,5 @@ class ModelConfigurations:
 logger.info(f"{PlatformConfigurations.__name__}: {PlatformConfigurations.__dict__}")
 logger.info(f"{APIConfigurations.__name__}: {APIConfigurations.__dict__}")
 logger.info(f"{ModelConfigurations.__name__}: {ModelConfigurations.__dict__}")
+logger.info(f"{ServiceConfiguraionsOutlier.__name__}: {ServiceConfiguraionsOutlier.__dict__}")
+logger.info(f"{ServiceConfigurations.__name__}: {ServiceConfigurations.__dict__}")

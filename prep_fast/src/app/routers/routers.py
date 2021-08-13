@@ -4,6 +4,7 @@ import time
 
 from fastapi import APIRouter
 from src.ml.prediction import Data, classifier
+from src.ml.outlier_detection import outlier_detector
 from src.configurations import ServiceConfigurations 
 
 logger = getLogger(__name__)
@@ -37,7 +38,12 @@ def label() -> Dict[int, str]:
 @router.get("/predict/test")
 def predict_test() -> Dict[str, Any]:
     input_ids = classifier.transform(Data().data)
-    results = {}
+    is_outlier, outlier_score = outlier_detector.predict(input_ids)
+    results = {
+        "is_outlier": is_outlier,
+        "outlier_score": outlier_score
+    }
+
     for service, url in ServiceConfigurations().services.items():
         logger.info(f"request to {url}")
         response = classifier.predict(input_ids, url)
@@ -48,7 +54,12 @@ def predict_test() -> Dict[str, Any]:
 @router.get("/predict/test/label")
 def predict_test_label() -> Dict[str, str]:
     input_ids = classifier.transform(Data().data)
-    results = {}
+    is_outlier, outlier_score = outlier_detector.predict(input_ids)
+    results = {
+        "is_outlier": is_outlier,
+        "outlier_score": outlier_score
+    }
+
     for service, url in ServiceConfigurations().services.items():
         logger.info(f"request to {url}")
         response = classifier.predict_label(input_ids, url)
@@ -59,7 +70,13 @@ def predict_test_label() -> Dict[str, str]:
 @router.post("/predict")
 def predict(data: Data, job_id: str) -> Dict[str, Any]:
     input_ids = classifier.transform(data.data)
-    results = {"job_id": job_id}
+    is_outlier, outlier_score = outlier_detector.predict(input_ids)
+    results = {
+        "job_id": job_id,
+        "is_outlier": is_outlier,
+        "outlier_score": outlier_score
+    }
+
     start = time.time()
     for service, url in ServiceConfigurations().services.items():
         logger.info(f"request to {url}")
@@ -74,7 +91,13 @@ def predict(data: Data, job_id: str) -> Dict[str, Any]:
 @router.post("/predict/label")
 def predict_label(data: Data, job_id: str) -> Dict[str, str]:
     input_ids = classifier.tranform(data.data)
-    results = {"job_id": job_id}
+    is_outlier, outlier_score = outlier_detector.predict(input_ids)
+    results = {
+        "job_id": job_id,
+        "is_outlier": is_outlier,
+        "outlier_score": outlier_score
+    }
+
     start = time.time()
     for service, url in ServiceConfigurations().services.items():
         logger.info(f"request to {url}")
