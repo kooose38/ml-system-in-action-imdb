@@ -19,7 +19,10 @@ class OutlierDetector(object):
     def predict(self, data: Any) -> Tuple[bool, list]:
         np_data = np.array(data).astype(np.float32)
         data = {"data": np_data}
-        is_outlier, outlier_score = requests.post(self.endpoint, data=json.dumps(data), headers=self.headers)
+        res = requests.post(self.endpoint, data=json.dumps(data), headers=self.headers)
+        res = res.json()
+        is_outlier = res["is_outlier"]
+        outlier_score = res["outlier_score"]
         outlier_score = list(outlier_score)
         return is_outlier, outlier_score
 
