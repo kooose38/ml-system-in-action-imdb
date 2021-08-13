@@ -1,67 +1,140 @@
+from src.configurations import ServiceConfigurations
 import uuid
 from logging import getLogger
-from typing import Any, Dict, List
+import asyncio
+from typing import Any, Dict, Tuple
+import httpx
+from pydantic import BaseModel 
 
 from fastapi import APIRouter
-from src.ml.prediction import Data, classifier
+from src.configurations import ServiceConfigurations, ServiceConfigurationsLightModel, ServiceConfigurationsSlowModel
 
 logger = getLogger(__name__)
 router = APIRouter()
 
+class Data(BaseModel):
+    data: str = "Lorem ipsum ."
 
 @router.get("/health")
-def health() -> Dict[str, str]:
-    return {
-        "health": "ok",
-    }
+async def health() -> Dict[str, Dict[str, str]]:
+    results = {}
+    async with httpx.AsyncClient() as ac:
+
+        async def req(ac, service, url) -> Tuple[str, dict]:
+            response = await ac.get(f"{url}health")
+            return service, response 
+        tasks = [req(ac, service, url) for service, url in ServiceConfigurations().services.items()]
+
+        responses = await asyncio.gather(*tasks)
+
+        for service, res in responses:
+            results[service] = res.json()
+
+    return results 
 
 
 @router.get("/metadata")
-def metadata() -> Dict[str, Any]:
-    return {
-        "data_type": "str",
-        "data_structure": (1, ),
-        "data_sample": ,
-        "prediction_type": "float32",
-        "prediction_structure": (1,2),
-        "prediction_sample": [0.97093159, 0.01558308],
-    }
+async def metadata() -> Dict[str, Dict[str, Any]]:
+    results = {}
+    async with httpx.AsyncClient() as ac:
 
+        async def req(ac, service, url) -> Tuple[str, dict]:
+            response = await ac.get(f"{url}metadata")
+            return service, response 
+        tasks = [req(ac, service, url) for service, url in ServiceConfigurations().services.items()]
 
-@router.get("/label")
-def label() -> Dict[int, str]:
-    return classifier.label
+        responses = await asyncio.gather(*tasks)
 
+        for service, res in responses:
+            results[service] = res.json()
 
-@router.get("/predict/test")
-def predict_test() -> Dict[str, List[float]]:
+    return results 
+
+@router.post("/predict/test")
+async def predict(data=Data()) -> Dict[str, dict]:
     job_id = str(uuid.uuid4())
-    prediction = classifier.predict(data=Data().data)
-    prediction_list = list(prediction)
-    logger.info(f"test {job_id}: {prediction_list}")
-    return {"prediction": prediction_list}
+    results = {}
+    async with httpx.AsyncClient() as ac:
+        async def req(ac, service, url, data, job_id):
+            res = await ac.post(
+                f"{url}predict", 
+                json={"data": data.data},
+                params={"id": job_id}
+            )
+            return service, res 
+        tasks = [req(ac, service, url, data, job_id) for service, url in ServiceConfigurations().services.items()]
+        responses = await asyncio.gather(*tasks)
+        for service, res in responses:
+            results[service] = res.json()
+        return results 
 
-
-@router.get("/predict/test/label")
-def predict_test_label() -> Dict[str, str]:
+@router.post("/predict/test/label")
+async def predict(data=Data()) -> Dict[str, Dict[str, str]]:
     job_id = str(uuid.uuid4())
-    prediction = classifier.predict_label(data=Data().data)
-    logger.info(f"test {job_id}: {prediction}")
-    return {"prediction": prediction}
+    results = {}
+    async with httpx.AsyncClient() as ac:
+        async def req(ac, service, url, data, job_id):
+            res = await ac.post(
+                f"{url}predict/label", 
+                json={"data": data.data},
+                params={"id": job_id}
+            )
+            return service, res 
+        tasks = [req(ac, service, url, data, job_id) for service, url in ServiceConfigurationsLightModel().services.items()]
+        responses = await asyncio.gather(*tasks)
+        for service, res in responses:
+            results[service] = res.json()
+        return results 
 
 
 @router.post("/predict")
-def predict(data: Data) -> Dict[str, List[float]]:
+async def predict(data: Data) -> Dict[str, dict]:
     job_id = str(uuid.uuid4())
-    prediction = classifier.predict(data.data)
-    prediction_list = list(prediction)
-    logger.info(f"{job_id}: {prediction_list}")
-    return {"prediction": prediction_list}
+    results = {}
+    async with httpx.AsyncClient() as ac:
+        async def req(ac, service, url, data, job_id):
+            res = await ac.post(
+                f"{url}predict", 
+                json={"data": data.data},
+                params={"job_id": job_id}
+            )
+            return service, res 
+        tasks = [req(ac, service, url, data, job_id) for service, url in ServiceConfigurations().services.items()]
+        responses = await asyncio.gather(*tasks)
+        for service, res in responses:
+            results[service] = res.json()
+        return results 
 
 
 @router.post("/predict/label")
-def predict_label(data: Data) -> Dict[str, str]:
+async def predict(data: Data) -> Dict[str, Dict[str, str]]:
     job_id = str(uuid.uuid4())
-    prediction = classifier.predict_label(data.data)
-    logger.info(f"test {job_id}: {prediction}")
-    return {"prediction": prediction}
+    results = {}
+    async with httpx.AsyncClient() as ac:
+        async def req(ac, service, url, data, job_id):
+            res = await ac.post(
+                f"{url}predict/label", 
+                json={"data": data.data},
+                params={"id": job_id}
+            )
+            return service, res 
+        tasks = [req(ac, service, url, data, job_id) for service, url in ServiceConfigurationsLightModel().services.items()]
+        responses = await asyncio.gather(*tasks)
+        for service, res in responses:
+            results[service] = res.json()
+        return results 
+
+@router.get("/job/{job_id}")
+async def predict(job_id: str) -> Dict[str, Dict[str, Any]]:
+    results = {}
+    async with httpx.AsyncClient() as ac:
+        async def req(ac, service, url, job_id):
+            res = await ac.get(
+                f"{url}job/{job_id}"
+            )
+            return service, res 
+        tasks = [req(ac, service, url, job_id) for service, url in ServiceConfigurationsSlowModel().services.items()]
+        responses = await asyncio.gather(*tasks)
+        for service, res in responses:
+            results[service] = res.json()
+        return results 
