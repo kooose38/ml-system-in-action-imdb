@@ -1,5 +1,6 @@
 from logging import getLogger
 from typing import Any, Dict
+import time 
 
 from fastapi import APIRouter
 from src.ml.prediction import Data, classifier
@@ -56,24 +57,30 @@ def predict_test_label() -> Dict[str, str]:
 
 
 @router.post("/predict")
-def predict(data: Data) -> Dict[str, Any]:
+def predict(data: Data, job_id: str) -> Dict[str, Any]:
     input_ids = classifier.transform(data.data)
-    results = {}
+    results = {"job_id": job_id}
+    start = time.time()
     for service, url in ServiceConfigurations().services.items():
         logger.info(f"request to {url}")
         response = classifier.predict(input_ids, url)
         results[service] = response
         logger.info(f"input: {data.data} output: {response}")
+    elapsed = 1000*(time.time()-start)
+    logger.info(f"[{job_id}] [{results}] [{elapsed} ms] [{data.data}] [{input_ids}]")
     return response 
 
 
 @router.post("/predict/label")
-def predict_label(data: Data) -> Dict[str, str]:
+def predict_label(data: Data, job_id: str) -> Dict[str, str]:
     input_ids = classifier.tranform(data.data)
-    results = {}
+    results = {"job_id": job_id}
+    start = time.time()
     for service, url in ServiceConfigurations().services.items():
         logger.info(f"request to {url}")
         response = classifier.predict_label(input_ids, url)
         results[service] = response 
         logger.info(f"input: {data.data} output: {response}")
+    elapsed = 1000*(time.time()-start)
+    logger.info(f"[{job_id}] [{results}] [{elapsed} ms] [{data.data}] [{input_ids}]")
     return results 
